@@ -4,6 +4,11 @@
   "description": "",
   "main": "server.js",
   "dependencies": {
+    "body-parser": "^1.18.3",
+    "dotenv": "^5.0.1",
+    "express": "^4.16.3",
+    "morgan": "^1.9.0",
+    "sentiment": "^5.0.0",
     "twitter": "^1.7.1"
   },
   "devDependencies": {

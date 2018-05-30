@@ -19,21 +19,34 @@
 
       // server needs to talk to Twitter
         // server then processes data, feeds to client
-        
-  const Twitter = require('twitter');
 
-  const client = new Twitter({
-    consumer_key: 'eNdOxUmEVKf61NL2RtMozUNTB',
-    consumer_secret: 'nv1VMxeEPn0Q17GpTE4uhlbw7Rc0zIWTcqDn2OOjmxftDJ02ce',
-    access_token_key: '1001832367366004736-Dxb0sfz9kj4mmWNKcoN5SGAJ2Xi5sl',
-    access_token_secret: 'B79ZS2Ng0GWnrpV5CevCGDmWiURIDuUI6WmeY5zx6Zw39'
-  });
+const express = require('express');
+const app = express();
+const morgan = require('morgan');
+const bodyParser = require('body-parser');
+const Twitter = require('twitter');
+const Sentiment = require('sentiment');
 
-  const params = {screen_name: 'chris__bridges'};
+app.use(morgan('common'));
+app.use(express.static('public'));
+app.use(bodyParser.json());
 
-const stream = client.stream('statuses/filter', {track: 'javascript'});
+const {CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET} = require('./config');
+
+const twitter = new Twitter({
+  consumer_key: CONSUMER_KEY,
+  consumer_secret: CONSUMER_SECRET,
+  access_token_key: ACCESS_TOKEN_KEY,
+  access_token_secret: ACCESS_TOKEN_SECRET
+});
+
+const sentiment = new Sentiment();
+
+const stream = twitter.stream('statuses/filter', {track: '$AAPL'});
   stream.on('data', function(event) {
     console.log(event && event.text);
+    const sentimentScore = sentiment.analyze(event.text).score;
+    console.log();
 });
 
 stream.on('error', function(error) {
