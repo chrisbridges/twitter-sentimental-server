@@ -26,12 +26,11 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const Twitter = require('twitter');
 const Sentiment = require('sentiment');
+const {CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET} = require('./config');
 
 app.use(morgan('common'));
 app.use(express.static('public'));
 app.use(bodyParser.json());
-
-const {CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET} = require('./config');
 
 const twitter = new Twitter({
   consumer_key: CONSUMER_KEY,
@@ -46,7 +45,7 @@ const stream = twitter.stream('statuses/filter', {track: '$AAPL'});
   stream.on('data', function(event) {
     console.log(event && event.text);
     const sentimentScore = sentiment.analyze(event.text).score;
-    console.log();
+    console.log(sentimentScore);
 });
 
 stream.on('error', function(error) {
