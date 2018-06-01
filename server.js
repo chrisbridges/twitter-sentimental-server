@@ -50,9 +50,11 @@ app.get('/stocks/:stock', function (req, res) {
   const {stock} = req.params;
   const stream = twitter.stream('statuses/filter', {track: `$${stock}`});
   stream.on('data', function(tweet) {
-    console.log(tweet && tweet.text);
-    const sentimentScore = sentiment.analyze(tweet.text).score;
+    const tweetText = tweet.text;
+    console.log(tweetText);
+    const sentimentScore = sentiment.analyze(tweetText).score;
     console.log(sentimentScore);
+    res.json({tweetText, sentimentScore})
   });
 
   stream.on('error', function(error) {
@@ -92,17 +94,6 @@ if (require.main === module) {
 
 // app.use('*', function (req, res) {
 //   res.status(404).sendFile(__dirname + '/public/page-not-found.html');
-// });
-
-// const stream = twitter.stream('statuses/filter', {track: '$AAPL'});
-//   stream.on('data', function(event) {
-//     console.log(event && event.text);
-//     const sentimentScore = sentiment.analyze(event.text);
-//     console.log(sentimentScore);
-// });
-
-// stream.on('error', function(error) {
-//   throw error;
 // });
 
 module.exports = {app, runServer, closeServer};
