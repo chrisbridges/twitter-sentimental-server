@@ -5,7 +5,7 @@
 // for multiple stock streams
   // get /stocks/subscribe/:stock
     // 
-    // TODO: confirm that Socket.io is allowed in this capstone, not just RESTful
+
 
     // graph price changes in correspondence with sentiment changes
     // socket in component - timeline of two streams of info in one socket
@@ -29,7 +29,7 @@ const Sentiment = require('sentiment');
 const {PORT, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET} = require('./config');
 
 app.use(morgan('common'));
-// app.use(express.static('public'));
+app.use(express.static('public'));
 // app.use(bodyParser.json());
 
 const twitter = new Twitter({
@@ -39,7 +39,12 @@ const twitter = new Twitter({
   access_token_secret: ACCESS_TOKEN_SECRET
 });
 
+
 const sentiment = new Sentiment();
+
+app.get('/', function(req, res) {
+  res.sendFile(__dirname + 'index.html');
+});
 
 app.get('/stocks/:stock', function (req, res) {
   const {stock} = req.params;
