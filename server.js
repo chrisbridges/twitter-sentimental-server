@@ -67,6 +67,7 @@ function fetchTweets (stock) {
     console.log(tweetText);
     const sentimentScore = sentiment.analyze(tweetText).score;
     console.log(sentimentScore);
+    return {tweetText, sentimentScore};
     // io.sockets.volatile.emit('tweet', {tweet: tweetText, sentimentScore});
   });
 
