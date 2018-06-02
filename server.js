@@ -22,6 +22,9 @@
 
 const express = require('express');
 const app = express();
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
+
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const Twitter = require('twitter');
@@ -30,7 +33,7 @@ const {PORT, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRE
 
 app.use(morgan('common'));
 app.use(express.static('public'));
-// app.use(bodyParser.json());
+app.use(bodyParser.json());
 
 const twitter = new Twitter({
   consumer_key: CONSUMER_KEY,
@@ -39,61 +42,87 @@ const twitter = new Twitter({
   access_token_secret: ACCESS_TOKEN_SECRET
 });
 
-
 const sentiment = new Sentiment();
 
 app.get('/', function(req, res) {
-  res.sendFile(__dirname + 'index.html');
+  res.sendFile(__dirname + '/index.html');
 });
 
-app.get('/stocks/:stock', function (req, res) {
-  const {stock} = req.params;
+http.listen(PORT, function () {
+  console.log(`listening on ${PORT}`);
+});
+
+io.on('connection', function(socket) {
+  console.log('a user connected');
+  socket.on('subscribeToTweets', stock => {
+    console.log(`retrieving tweets about ${stock}`);
+    socket.emit('tweets', fetchTweets(stock));    
+  });
+});
+
+function fetchTweets (stock) {
   const stream = twitter.stream('statuses/filter', {track: `$${stock}`});
   stream.on('data', function(tweet) {
     const tweetText = tweet.text;
     console.log(tweetText);
     const sentimentScore = sentiment.analyze(tweetText).score;
     console.log(sentimentScore);
-    res.json({tweetText, sentimentScore})
+    // io.sockets.volatile.emit('tweet', {tweet: tweetText, sentimentScore});
   });
 
   stream.on('error', function(error) {
     throw error;
   });
-});
-
-let server;
-
-function runServer(port = PORT) {
-  return new Promise((resolve, reject) => {
-    server = app.listen(port, () => {
-      console.log(`Your app is listening on port ${port}`);
-      resolve();
-    })
-      .on('error', err => {
-        reject(err);
-      });
-  });
 }
 
-function closeServer() {
-  return new Promise((resolve, reject) => {
-    console.log('Closing server');
-    server.close(err => {
-      if (err) {
-        return reject(err);
-      }
-      resolve();
-    });
-  });
-}
+// app.get('/stocks/:stock', function (req, res) {
+//   const {stock} = req.params;
+//   const stream = twitter.stream('statuses/filter', {track: `$${stock}`});
+//   stream.on('data', function(tweet) {
+//     const tweetText = tweet.text;
+//     console.log(tweetText);
+//     const sentimentScore = sentiment.analyze(tweetText).score;
+//     console.log(sentimentScore);
+//     io.sockets.volatile.emit('tweet', {tweet: tweetText, sentimentScore});
+//   });
 
-if (require.main === module) {
-  runServer().catch(err => console.error(err));
-}
+//   stream.on('error', function(error) {
+//     throw error;
+//   });
+// });
+
+// let server;
+
+// function runServer(port = PORT) {
+//   return new Promise((resolve, reject) => {
+//     server = app.listen(port, () => {
+//       console.log(`Your app is listening on port ${port}`);
+//       resolve();
+//     })
+//       .on('error', err => {
+//         reject(err);
+//       });
+//   });
+// }
+
+// function closeServer() {
+//   return new Promise((resolve, reject) => {
+//     console.log('Closing server');
+//     server.close(err => {
+//       if (err) {
+//         return reject(err);
+//       }
+//       resolve();
+//     });
+//   });
+// }
+
+// if (require.main === module) {
+//   runServer().catch(err => console.error(err));
+// }
 
 // app.use('*', function (req, res) {
 //   res.status(404).sendFile(__dirname + '/public/page-not-found.html');
 // });
 
-module.exports = {app, runServer, closeServer};
+// module.exports = {app, runServer, closeServer};
