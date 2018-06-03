@@ -44,9 +44,9 @@ const twitter = new Twitter({
 
 const sentiment = new Sentiment();
 
-app.get('/', function(req, res) {
-  res.sendFile(__dirname + '/index.html');
-});
+// app.get('/', function(req, res) {
+//   res.sendFile(__dirname + '/index.html');
+// });
 
 http.listen(PORT, function () {
   console.log(`listening on ${PORT}`);
@@ -55,19 +55,23 @@ http.listen(PORT, function () {
 io.on('connection', function(socket) {
   console.log('a user connected');
   socket.on('subscribeToTweets', stock => {
-    console.log(`retrieving tweets about ${stock}`);
-    socket.emit('tweets', fetchTweets(stock));    
+    // console.log(`retrieving tweets about ${stock}`);
+    // socket.emit('tweets', fetchTweets(stock)); don't want to send tweets upon connection
   });
 });
 
 function fetchTweets (stock) {
   const stream = twitter.stream('statuses/filter', {track: `$${stock}`});
   stream.on('data', function(tweet) {
-    const tweetText = tweet.text;
-    console.log(tweetText);
-    const sentimentScore = sentiment.analyze(tweetText).score;
-    console.log(sentimentScore);
-    return {tweetText, sentimentScore};
+    // console.log(tweet);
+    if (tweet.text) {
+      const tweetText = tweet.text;
+      // console.log(tweetText);
+      const sentimentScore = sentiment.analyze(tweetText).score;
+      // console.log(sentimentScore);
+      console.log({tweetText, sentimentScore});
+      return {tweetText, sentimentScore};
+    }
     // io.sockets.volatile.emit('tweet', {tweet: tweetText, sentimentScore});
   });
 
