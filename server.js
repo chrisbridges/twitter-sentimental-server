@@ -54,7 +54,7 @@ function createNewSubscription (symbol) {
 	stream.on('data', data => {
     // console.log(data);
     const analysis = sentiment.analyze(data.text);
-    console.log(analysis);
+    // console.log(analysis);
     const score = analysis.score;
     const positiveWords = analysis.positive;
     const negativeWords = analysis.negative;
@@ -77,6 +77,10 @@ socket.on('connection', (socket) => {
     // if (symbolIsNew) {
     createNewSubscription(symbol);
     // }
+  });
+  // TODO: disconnect logic
+  socket.on('disconnect', () => {
+    console.log(`${socket.id} has disconnected`);
   });
 });
 
