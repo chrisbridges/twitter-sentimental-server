@@ -49,12 +49,14 @@ function removeFromRegistry(user){
 	// removeFromRegistry(2) => ['AAPL', 'AMZN']
 }
 
-function createSubscription (symbol) {
-	const sub = twitter.stream.on(data => {
-		const analysis = sentiment(data);
-		socket.emit(`symbol-${symbol}`, { analysis, tweet: data });
+function createNewSubscription (symbol) {
+  const stream = twitter.stream('statuses/filter', {track: `$${symbol}`});
+	stream.on('data', data => {
+    console.log(data);
+		const analysis = sentiment.analyze(data.text).score;
+		socket.emit(`symbol-${symbol}`, { analysis, tweet: data.text });
 	})
-	subscriptions[symbol] = sub;
+	// subscriptions[symbol] = sub;
 }
 
 function destroySubscription (symbol) {
@@ -63,13 +65,13 @@ function destroySubscription (symbol) {
 
 socket.on('connection', (socket) => {
   // console.log(socket.id);
-	// Maybe not (socket ID?) find a way to generate a unqiue finger print for each frontend user
+	// Maybe not (socket ID?) find a way to generate a unique finger print for each frontend user
   console.log(`${socket.id} has connected`);
   socket.on('request-symbol', (symbol) => {
-    console.log(`Client is searching for ${symbol}`);
+    console.log(`${socket.id} is searching for ${symbol}`);
     // const symbolIsNew = addToRegistry(symbol, user);
     // if (symbolIsNew) {
-    // 	createNewSubscription();
+    createNewSubscription(symbol);
     // }
   });
 });
