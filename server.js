@@ -10,7 +10,7 @@ const Sentiment = require('sentiment');
 const {PORT, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET} = require('./config');
 
 app.use(morgan('common'));
-app.use(express.static('public'));
+// app.use(express.static('public'));
 app.use(bodyParser.json());
 
 const twitter = new Twitter({
@@ -55,10 +55,10 @@ function createNewSubscription (symbol) {
     // console.log(data);
     const analysis = sentiment.analyze(data.text);
     // console.log(analysis);
-    const score = analysis.score;
+    const sentimentScore = analysis.score;
     const positiveWords = analysis.positive;
     const negativeWords = analysis.negative;
-		socket.emit(`symbol-${symbol}`, { score, positiveWords, negativeWords, tweet: data.text });
+		socket.emit(`symbol-${symbol}`, { sentimentScore, positiveWords, negativeWords, tweet: data.text });
 	})
 	// subscriptions[symbol] = sub;
 }
