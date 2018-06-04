@@ -52,9 +52,13 @@ function removeFromRegistry(user){
 function createNewSubscription (symbol) {
   const stream = twitter.stream('statuses/filter', {track: `$${symbol}`});
 	stream.on('data', data => {
-    console.log(data);
-		const analysis = sentiment.analyze(data.text).score;
-		socket.emit(`symbol-${symbol}`, { analysis, tweet: data.text });
+    // console.log(data);
+    const analysis = sentiment.analyze(data.text);
+    console.log(analysis);
+    const score = analysis.score;
+    const positiveWords = analysis.positive;
+    const negativeWords = analysis.negative;
+		socket.emit(`symbol-${symbol}`, { score, positiveWords, negativeWords, tweet: data.text });
 	})
 	// subscriptions[symbol] = sub;
 }
