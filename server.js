@@ -1,29 +1,7 @@
-// dependencies and imports
-
-// the Twitter API has a streaming method that would allow me to continuously receive data without having to ping it every time
-
-// for multiple stock streams
-  // get /stocks/subscribe/:stock
-    // 
-
-
-    // graph price changes in correspondence with sentiment changes
-    // socket in component - timeline of two streams of info in one socket
-      // find streaming stock price API
-
-
-      // var stream = client.stream('statuses/filter', {track: 'javascript'});
-      // stream.on('data', function(event) {
-      //   console.log(event && event.text);
-      // });
-
-      // server needs to talk to Twitter
-        // server then processes data, feeds to client
-
 const express = require('express');
 const app = express();
 const http = require('http').Server(app);
-const io = require('socket.io')(http);
+const socket = require('socket.io')(http);
 
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
@@ -44,86 +22,62 @@ const twitter = new Twitter({
 
 const sentiment = new Sentiment();
 
-app.get('/', function(req, res) {
-  res.sendFile(__dirname + '/index.html');
-});
-
 http.listen(PORT, function () {
   console.log(`listening on ${PORT}`);
 });
 
-io.on('connection', function(socket) {
-  console.log('a user connected');
-  socket.on('subscribeToTweets', stock => {
-    console.log(`retrieving tweets about ${stock}`);
-    socket.emit('tweets', fetchTweets(stock));    
+const subscriptions = {};
+
+const registry = {};
+
+function addToRegistry (symbol, user) {
+	// make sure symbol exists in registry, and user is in the array
+	// return true iff the symbol isn't already in the registry
+}
+
+function removeFromRegistry(user){
+	// remove user from all symbol' array inside registry
+	// also perform a cleanup to get rid of any symbol that has an array of length 0
+	// returns an array of symbols that are removed from the registry
+
+	// example
+	// const r = {
+	// 	AAPL: [2],
+	// 	AMZN: [2],
+	// 	GOOL: [4]
+	// }
+	// removeFromRegistry(2) => ['AAPL', 'AMZN']
+}
+
+function createSubscription (symbol) {
+	const sub = twitter.stream.on(data => {
+		const analysis = sentiment(data);
+		socket.emit(`symbol-${symbol}`, { analysis, tweet: data });
+	})
+	subscriptions[symbol] = sub;
+}
+
+function destroySubscription (symbol) {
+	delete subscription['symbol'];
+}
+
+socket.on('connection', (socket) => {
+  // console.log(socket.id);
+	// Maybe not (socket ID?) find a way to generate a unqiue finger print for each frontend user
+  console.log(`${socket.id} has connected`);
+  socket.on('request-symbol', (symbol) => {
+    console.log(`Client is searching for ${symbol}`);
+    // const symbolIsNew = addToRegistry(symbol, user);
+    // if (symbolIsNew) {
+    // 	createNewSubscription();
+    // }
   });
 });
 
-function fetchTweets (stock) {
-  const stream = twitter.stream('statuses/filter', {track: `$${stock}`});
-  stream.on('data', function(tweet) {
-    const tweetText = tweet.text;
-    console.log(tweetText);
-    const sentimentScore = sentiment.analyze(tweetText).score;
-    console.log(sentimentScore);
-    return {tweetText, sentimentScore};
-    // io.sockets.volatile.emit('tweet', {tweet: tweetText, sentimentScore});
-  });
-
-  stream.on('error', function(error) {
-    throw error;
-  });
-}
-
-// app.get('/stocks/:stock', function (req, res) {
-//   const {stock} = req.params;
-//   const stream = twitter.stream('statuses/filter', {track: `$${stock}`});
-//   stream.on('data', function(tweet) {
-//     const tweetText = tweet.text;
-//     console.log(tweetText);
-//     const sentimentScore = sentiment.analyze(tweetText).score;
-//     console.log(sentimentScore);
-//     io.sockets.volatile.emit('tweet', {tweet: tweetText, sentimentScore});
-//   });
-
-//   stream.on('error', function(error) {
-//     throw error;
-//   });
-// });
-
-// let server;
-
-// function runServer(port = PORT) {
-//   return new Promise((resolve, reject) => {
-//     server = app.listen(port, () => {
-//       console.log(`Your app is listening on port ${port}`);
-//       resolve();
-//     })
-//       .on('error', err => {
-//         reject(err);
-//       });
-//   });
-// }
-
-// function closeServer() {
-//   return new Promise((resolve, reject) => {
-//     console.log('Closing server');
-//     server.close(err => {
-//       if (err) {
-//         return reject(err);
-//       }
-//       resolve();
-//     });
-//   });
-// }
-
-// if (require.main === module) {
-//   runServer().catch(err => console.error(err));
-// }
-
-// app.use('*', function (req, res) {
-//   res.status(404).sendFile(__dirname + '/public/page-not-found.html');
-// });
-
-// module.exports = {app, runServer, closeServer};
+socket.on('disconnect', ({ user }) => {
+	const symbolsRemoved = removeFromRegistry(user);
+	symbolsRemoved.forEach(symbol => {
+		destroySubscription(symbol)
+	});
+	console.log(`${user.id} has disconnected`);
+});
