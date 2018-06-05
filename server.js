@@ -50,16 +50,19 @@ function removeFromRegistry(user){
 }
 
 function createNewSubscription (symbol) {
-  const stream = twitter.stream('statuses/filter', {track: `$${symbol}`});
+  const stream = twitter.stream('statuses/filter', {track: `${symbol}`});
 	stream.on('data', data => {
-    // console.log(data);
+    console.log(data);
+    const userImage = data.user.profile_image_url_https;
+    const username = data.user.screen_name;
+    const tweetText = data.text;
     const analysis = sentiment.analyze(data.text);
     // console.log(analysis);
     const sentimentScore = analysis.score;
     const positiveWords = analysis.positive;
     const negativeWords = analysis.negative;
     // console.log(positiveWords);
-		socket.emit(`symbol-${symbol}`, { sentimentScore, positiveWords, negativeWords, tweet: data.text });
+		socket.emit(`symbol-${symbol}`, { sentimentScore, positiveWords, negativeWords, tweet: {text: tweetText, userImage, username} });
 	})
 	// subscriptions[symbol] = sub;
 }
