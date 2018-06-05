@@ -58,6 +58,7 @@ function createNewSubscription (symbol) {
     const sentimentScore = analysis.score;
     const positiveWords = analysis.positive;
     const negativeWords = analysis.negative;
+    // console.log(positiveWords);
 		socket.emit(`symbol-${symbol}`, { sentimentScore, positiveWords, negativeWords, tweet: data.text });
 	})
 	// subscriptions[symbol] = sub;
