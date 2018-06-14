@@ -10,7 +10,6 @@ const Sentiment = require('sentiment');
 const {PORT, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET} = require('./config');
 
 app.use(morgan('common'));
-// app.use(express.static('public'));
 app.use(bodyParser.json());
 
 const twitter = new Twitter({
@@ -26,72 +25,44 @@ http.listen(PORT, function () {
   console.log(`listening on ${PORT}`);
 });
 
-const subscriptions = {};
-
-const registry = {};
-
-function addToRegistry (symbol, user) {
-	// make sure symbol exists in registry, and user is in the array
-	// return true iff the symbol isn't already in the registry
-}
-
-function removeFromRegistry(user){
-	// remove user from all symbol' array inside registry
-	// also perform a cleanup to get rid of any symbol that has an array of length 0
-	// returns an array of symbols that are removed from the registry
-
-	// example
-	// const r = {
-	// 	AAPL: [2],
-	// 	AMZN: [2],
-	// 	GOOL: [4]
-	// }
-	// removeFromRegistry(2) => ['AAPL', 'AMZN']
-}
+let currentSubscription;
 
 function createNewSubscription (symbol) {
+  destroySubscription(); // if there is another stream currently running, kill it
   const stream = twitter.stream('statuses/filter', {track: `${symbol}`});
+  currentSubscription = stream;
 	stream.on('data', data => {
-    console.log(data);
     const userImage = data.user.profile_image_url_https;
     const username = data.user.screen_name;
     const tweetText = data.text;
     const analysis = sentiment.analyze(data.text);
-    // console.log(analysis);
+    console.log(analysis);
     const sentimentScore = analysis.score;
     const positiveWords = analysis.positive;
     const negativeWords = analysis.negative;
-    // console.log(positiveWords);
 		socket.emit(`symbol-${symbol}`, { sentimentScore, positiveWords, negativeWords, tweet: {text: tweetText, userImage, username} });
-	})
-	// subscriptions[symbol] = sub;
+	});
 }
 
-function destroySubscription (symbol) {
-	delete subscription['symbol'];
+function destroySubscription () {
+  if (currentSubscription) {
+    currentSubscription.destroy();
+    console.log('Current Subscription destroyed');
+  }
+  return;
 }
 
 socket.on('connection', (socket) => {
-  // console.log(socket.id);
-	// Maybe not (socket ID?) find a way to generate a unique finger print for each frontend user
   console.log(`${socket.id} has connected`);
-  socket.on('request-symbol', (symbol) => {
-    console.log(`${socket.id} is searching for ${symbol}`);
-    // const symbolIsNew = addToRegistry(symbol, user);
-    // if (symbolIsNew) {
+  socket.on('request-symbol', (symbol) => { // is this only going to work for initial connection? Needs to be available when searching for new stock as well
+    console.log(`${socket.id} is requesting ${symbol}`);
     createNewSubscription(symbol);
-    // }
   });
-  // TODO: disconnect logic
-  socket.on('disconnect', () => {
+
+  socket.on('disconnect', () => { // this event only fires upon disconnect. Maybe focus on disconnecting from client-side
     console.log(`${socket.id} has disconnected`);
+    destroySubscription();
   });
 });
 
-socket.on('disconnect', ({ user }) => {
-	const symbolsRemoved = removeFromRegistry(user);
-	symbolsRemoved.forEach(symbol => {
-		destroySubscription(symbol)
-	});
-	console.log(`${user.id} has disconnected`);
-});
+// socket.id's vary from client to server? Gonna have to only use the server ID. Client would send different ID
