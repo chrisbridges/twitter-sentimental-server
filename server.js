@@ -25,12 +25,17 @@ http.listen(PORT, function () {
   console.log(`listening on ${PORT}`);
 });
 
-let currentSubscription;
+// let currentSubscription;
 
-function createNewSubscription (symbol) {
-  destroySubscription(); // if there is another stream currently running, kill it
+const userRegistry = {};
+// UserID (socketID): stream 
+
+function createNewSubscription (symbol, socketID) {
+  destroySubscription(socketID); // if there is another stream currently running, kill it
   const stream = twitter.stream('statuses/filter', {track: `${symbol}`});
-  currentSubscription = stream;
+  userRegistry[socketID] = stream;
+  console.log('New stream added to user registry');
+  // currentSubscription = stream;
 	stream.on('data', data => {
     const userImage = data.user.profile_image_url_https;
     const username = data.user.screen_name;
@@ -44,11 +49,18 @@ function createNewSubscription (symbol) {
 	});
 }
 
-function destroySubscription () {
-  if (currentSubscription) {
-    currentSubscription.destroy();
-    console.log('Current Subscription destroyed');
+function destroySubscription (socketID) {
+  const currentUserSubscription = userRegistry[socketID];
+  // if (currentSubscription) {
+  //   currentSubscription.destroy();
+  //   console.log('Current Subscription destroyed');
+  // }
+  if (currentUserSubscription) {
+    currentUserSubscription.destroy();
+    console.log(`${socketID} subscription destroyed`);
   }
+  
+  // userRegistry[socketID] = null;
   return;
 }
 
@@ -56,12 +68,12 @@ socket.on('connection', (socket) => {
   console.log(`${socket.id} has connected`);
   socket.on('request-symbol', (symbol) => { // is this only going to work for initial connection? Needs to be available when searching for new stock as well
     console.log(`${socket.id} is requesting ${symbol}`);
-    createNewSubscription(symbol);
+    createNewSubscription(symbol, socket.id);
   });
 
   socket.on('disconnect', () => { // this event only fires upon disconnect. Maybe focus on disconnecting from client-side
     console.log(`${socket.id} has disconnected`);
-    destroySubscription();
+    destroySubscription(socket.id);
   });
 });
 
