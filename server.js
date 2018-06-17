@@ -34,7 +34,7 @@ function createNewSubscription (symbol, socketID) {
   destroySubscription(socketID); // if there is another stream currently running, kill it
   const stream = twitter.stream('statuses/filter', {track: `${symbol}`});
   userRegistry[socketID] = stream;
-  console.log('New stream added to user registry');
+  console.log(`New stream added to ${socket.id} registry`);
   // currentSubscription = stream;
 	stream.on('data', data => {
     const userImage = data.user.profile_image_url_https;
