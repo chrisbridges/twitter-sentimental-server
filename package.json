@@ -29,7 +29,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "dev": "nodemon"
+    "dev": "nodemon server.js"
   },
   "devDependencies": {
     "enzyme": "^3.3.0",
