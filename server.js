@@ -8,10 +8,10 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const Twitter = require('twitter');
 const Sentiment = require('sentiment');
-const {PORT, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET} = require('./config');
+const {PORT, CLIENT_ORIGIN, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET} = require('./config');
 
-// app.use(cors());
-// app.options('*', cors());
+app.use(cors({origin: CLIENT_ORIGIN}));
+app.options('*', cors());
 
 app.use(morgan('common'));
 app.use(express.static('public'));
