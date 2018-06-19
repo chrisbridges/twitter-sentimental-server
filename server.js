@@ -14,12 +14,9 @@ app.use(cors({origin: CLIENT_ORIGIN}));
 app.options('*', cors());
 
 app.use(morgan('common'));
-app.use(express.static('public'));
+// app.use(express.static('public'));
 app.use(bodyParser.json());
 
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + 'public/index.html');
-});
 
 const twitter = new Twitter({
   consumer_key: CONSUMER_KEY,
