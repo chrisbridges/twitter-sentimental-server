@@ -31,7 +31,7 @@ http.listen(PORT, function () {
 });
 
 // Allow Cross-Domain Requests
-socket.set('transports', ['websocket']);
+// socket.set('transports', ['websocket']);
 
 
 const userRegistry = {};
