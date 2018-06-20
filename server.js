@@ -29,8 +29,8 @@ http.listen(PORT, function () {
 });
 
 
-// Allow Cross-Domain Requests
-socket.set('transports', ['websocket']);
+// Allow Cross-Domain Requests - this broke things 
+// socket.set('transports', ['websocket']);
 
 
 const userRegistry = {};

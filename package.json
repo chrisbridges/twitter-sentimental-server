@@ -3,39 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "chart.js": "^2.7.2",
-    "chartjs-plugin-streaming": "^1.5.0",
     "cors": "^2.8.4",
     "dotenv": "^5.0.1",
     "express": "^4.16.3",
-    "moment": "^2.22.2",
     "morgan": "^1.9.0",
-    "prop-types": "^15.6.1",
-    "react": "^16.4.1",
-    "react-accessible-accordion": "^2.4.2",
-    "react-dom": "^16.4.1",
-    "react-redux": "^5.0.7",
-    "react-spinners": "^0.3.2",
-    "redux": "^4.0.0",
-    "redux-thunk": "^2.3.0",
     "sentiment": "^5.0.0",
     "socket.io": "^2.1.1",
-    "socket.io-client": "^2.1.1",
-    "twitter": "^1.7.1",
-    "typed.js": "^2.0.8"
+    "twitter": "^1.7.1"
   },
   "scripts": {
     "start": "node server.js",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
     "dev": "nodemon server.js"
   },
   "devDependencies": {
-    "enzyme": "^3.3.0",
-    "enzyme-adapter-react-16": "^1.1.1",
-    "react-scripts": "^1.1.4",
-    "react-test-renderer": "^16.4.1",
     "nodemon": "^1.17.5"
   }
 }
