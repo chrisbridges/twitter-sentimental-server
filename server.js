@@ -8,14 +8,12 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const Twitter = require('twitter');
 const Sentiment = require('sentiment');
-const {PORT, CLIENT_ORIGIN, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET} = require('./config');
+const {PORT, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET} = require('./config');
 
 app.use(cors());
 
 app.use(morgan('common'));
-// app.use(express.static('public'));
-app.use(bodyParser.json()); 
-
+app.use(bodyParser.json());
 
 const twitter = new Twitter({
   consumer_key: CONSUMER_KEY,
@@ -29,6 +27,7 @@ const sentiment = new Sentiment();
 http.listen(PORT, function () {
   console.log(`listening on ${PORT}`);
 });
+
 
 // Allow Cross-Domain Requests
 socket.set('transports', ['websocket']);
