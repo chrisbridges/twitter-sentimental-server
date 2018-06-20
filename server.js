@@ -30,7 +30,7 @@ http.listen(PORT, function () {
   console.log(`listening on ${PORT}`);
 });
 
-Allow Cross-Domain Requests
+// Allow Cross-Domain Requests
 socket.set('transports', ['websocket']);
 
 
