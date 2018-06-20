@@ -30,8 +30,8 @@ http.listen(PORT, function () {
   console.log(`listening on ${PORT}`);
 });
 
-// Allow Cross-Domain Requests
-// socket.set('transports', ['websocket']);
+Allow Cross-Domain Requests
+socket.set('transports', ['websocket']);
 
 
 const userRegistry = {};
