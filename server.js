@@ -30,12 +30,8 @@ http.listen(PORT, function () {
   console.log(`listening on ${PORT}`);
 });
 
-app.get('/', function(req, res) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'X-Requested-With');
-//  res.sendfile(__dirname + '/client.html')
-
-});
+// Allow Cross-Domain Requests
+socket.set('transports', ['websocket']);
 
 
 const userRegistry = {};
