@@ -15,7 +15,7 @@ const {PORT, CLIENT_ORIGIN, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACC
 
 app.use(morgan('common'));
 // app.use(express.static('public'));
-app.use(bodyParser.json());
+app.use(bodyParser.json()); 
 
 
 const twitter = new Twitter({
