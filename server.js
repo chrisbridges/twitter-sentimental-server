@@ -10,7 +10,7 @@ const Twitter = require('twitter');
 const Sentiment = require('sentiment');
 const {PORT, CLIENT_ORIGIN, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET} = require('./config');
 
-app.use(cors({origin: CLIENT_ORIGIN}));
+app.use(cors());
 
 app.use(morgan('common'));
 // app.use(express.static('public'));
