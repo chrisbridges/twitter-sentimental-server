@@ -28,13 +28,9 @@ http.listen(PORT, function () {
   console.log(`listening on ${PORT}`);
 });
 
-
-// Allow Cross-Domain Requests - this broke things 
-// socket.set('transports', ['websocket']);
-
-
+// registry for user socket IDs, and the twitter instances they're currently subscribed to
 const userRegistry = {};
-
+// subscribe user to tweets they searched for
 function createNewSubscription (symbol, socketID) {
   destroySubscription(socketID); // if there is another stream currently running, kill it
   const stream = twitter.stream('statuses/filter', {track: `${symbol}`});
@@ -45,14 +41,14 @@ function createNewSubscription (symbol, socketID) {
     const username = data.user.screen_name;
     const tweetText = data.text;
     const analysis = sentiment.analyze(data.text);
-    console.log(analysis);
     const sentimentScore = analysis.score;
     const positiveWords = analysis.positive;
     const negativeWords = analysis.negative;
+    // send analysis and twitter user info along with tweet
 		socket.emit(`symbol-${symbol}`, { sentimentScore, positiveWords, negativeWords, tweet: {text: tweetText, userImage, username} });
 	});
 }
-
+// remove subscription for user to either subscribe to new stream or upon user disconnect
 function destroySubscription (socketID) {
   const currentUserSubscription = userRegistry[socketID];
 
@@ -63,7 +59,7 @@ function destroySubscription (socketID) {
   
   return;
 }
-
+// logic for new user connection && disconnect
 socket.on('connection', (socket) => {
   console.log(`${socket.id} has connected`);
   socket.on('request-symbol', (symbol) => { 
